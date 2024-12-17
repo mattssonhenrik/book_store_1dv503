@@ -37,3 +37,8 @@ application {
     // Define the main class for the application.
     mainClass.set("book_store_1dv503.Main")
 }
+
+tasks.withType<JavaExec> {
+    standardInput = System.`in`
+}
+
