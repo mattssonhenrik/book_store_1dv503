@@ -16,11 +16,14 @@ repositories {
 }
 
 dependencies {
-    // Use JUnit test framework.
-    testImplementation(libs.junit)
+    // Default JUnit test dependency
+    testImplementation("junit:junit:4.13.2")
 
-    // This dependency is used by the application.
-    implementation(libs.guava)
+    // Guava library
+    implementation("com.google.guava:guava:33.0.0-jre")
+
+    // MySQL JDBC dependency
+    implementation("mysql:mysql-connector-java:8.0.33")
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
@@ -32,5 +35,5 @@ java {
 
 application {
     // Define the main class for the application.
-    mainClass.set("book_store_1dv503.App")
+    mainClass.set("book_store_1dv503.Main")
 }
