@@ -5,9 +5,39 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
+import book_store_1dv503.view.BrowseView;
+
 public class BrowseController {
   public BrowseController() {
     System.out.println("Hi from BrowseController");
+    startBrowseMenu();
+  }
+
+  public void startBrowseMenu() {
+    boolean running = true;
+    while (running) {
+      BrowseView browseView = new BrowseView();
+      String option = browseView.showBrowseMenu();
+      switch (option) {
+        case "1":
+
+          System.out.println("Please enter your choice 1");
+          break;
+        case "2":
+          System.out.println("Please enter your choice 2");
+          break;
+        case "3":
+          System.out.println("Please enter your choice 3");
+          break;
+        case "4":
+          System.out.println("Please enter your choice 4");
+          running = false;
+          break;
+        default:
+          System.out.println("Not a valid option.");
+          break;
+      }
+    }
   }
 
   public void SQLCALL() {

@@ -5,8 +5,7 @@ import book_store_1dv503.view.MemberMenuView;
 public class MemberController {
   BrowseController browseController;
 
-  public MemberController () {
-
+  public MemberController() {
     startMemberMenu();
   }
 
@@ -17,16 +16,16 @@ public class MemberController {
       String option = memberMenuView.showMemberMenu();
       switch (option) {
         case "1":
-        // Funktion som loggar in medlemmen
-        loginMember();
-        System.out.println("Please enter your choice 1");
+          loginMember();
+          System.out.println("Please enter your choice 1");
           break;
         case "2":
-        System.out.println("Please enter your choice 2");
+          registerMember();
+          System.out.println("Please enter your choice 2");
           break;
         case "q":
-        System.out.println("Please enter your choice q");
-        running = false;
+          System.out.println("Please enter your choice q");
+          running = false;
           break;
         default:
           System.out.println("Not a valid option.");
@@ -36,8 +35,14 @@ public class MemberController {
   }
 
   public void loginMember() {
-    //Something something login member, try/catch?
-    //If successful
+    // Something something login member, try/catch?
+    // If successful
+    browseController = new BrowseController();
+  }
+
+  public void registerMember() {
+    // Something something login member, try/catch?
+    // If successful
     browseController = new BrowseController();
   }
 }
