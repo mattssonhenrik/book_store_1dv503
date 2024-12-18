@@ -4,20 +4,19 @@ import book_store_1dv503.view.MemberMenuView;
 
 public class MemberController {
   BrowseController browseController;
+  boolean running = true;
 
   public MemberController() {
     startMemberMenu();
   }
 
   public void startMemberMenu() {
-    boolean running = true;
     while (running) {
       MemberMenuView memberMenuView = new MemberMenuView();
       String option = memberMenuView.showMemberMenu();
       switch (option) {
         case "1":
           loginMember();
-          System.out.println("Please enter your choice 1");
           break;
         case "2":
           registerMember();
@@ -38,7 +37,7 @@ public class MemberController {
     // Something something login member, try/catch?
     // If successful
     browseController = new BrowseController();
-  }
+  } 
 
   public void registerMember() {
     // Something something login member, try/catch?
