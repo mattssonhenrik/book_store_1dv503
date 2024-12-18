@@ -142,6 +142,7 @@ public class BrowseController {
             bookLoop = false;
             paginationLoop = false;
           } else {
+            // Gotta check if the input is an ISBN first, if not we proceed
             System.out.println("Wrong input");
             paginationLoop = true;
           }
@@ -193,6 +194,7 @@ public class BrowseController {
             bookLoop = false;
             paginationLoop = false;
           } else {
+            // Gotta check if the input is an ISBN first, if not we proceed
             System.out.println("Wrong input");
             paginationLoop = true;
           }
@@ -245,6 +247,7 @@ public class BrowseController {
             bookLoop = false;
             paginationLoop = false;
           } else {
+            // Gotta check if the input is an ISBN first, if not we proceed
             System.out.println("Wrong input");
             paginationLoop = true;
           }
