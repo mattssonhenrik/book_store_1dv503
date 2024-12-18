@@ -69,6 +69,10 @@ public class BrowseView {
     return userChoice;
   }
 
+  public void printSubject (String subject) {
+    System.out.println("Subject: " + subject);
+  }
+
   // --------------------------------- Search By Author/Title
   // ---------------------------------
   public String showBrowseByAuthorAndTitleMenu() {
@@ -77,17 +81,25 @@ public class BrowseView {
     System.out.println("|          Search by Author/Title          |");
     System.out.println("|__________________________________________|");
     System.out.println("|                                          |");
-    System.out.println("| 1. BROWSE BY SUBJECT                     |");
-    System.out.println("| 2. SEARCH BY AUTHOR/TITLE                |");
-    System.out.println("| 3. CHECK OUT                             |");
-    System.out.println("| 4. LOGUOUT                               |");
+    System.out.println("| 1. BROWSE BY AUTHOR                      |");
+    System.out.println("| 2. SEARCH BY TITLE                       |");
+    System.out.println("| 3. BACK                                  |");
     System.out.println("|__________________________________________|");
 
     String userChoice = readUserInput();
     return userChoice;
   }
 
-  public void printSubject (String subject) {
-    System.out.println("Subject: " + subject);
+  public String getAuthorChoice() {
+    System.out.println("Which author are you interested in?");
+    String userChoice = scanner.nextLine().trim().toLowerCase();
+    return userChoice;
   }
+
+  public String getTitleChoice() {
+    System.out.println("Which title are you interested in?");
+    String userChoice = scanner.nextLine().trim().toLowerCase();
+    return userChoice;
+  }
+
 }

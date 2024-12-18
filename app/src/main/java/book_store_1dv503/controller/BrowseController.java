@@ -12,7 +12,9 @@ public class BrowseController {
   boolean running = true;
   boolean subjectLoop = true;
   boolean bookLoop = true;
+  boolean ATLoop = true;
   int currentPagination = 0;
+  int ATPagination = 0;
 
   public BrowseController() {
     browseView = new BrowseView();
@@ -26,6 +28,7 @@ public class BrowseController {
       running = true;
       subjectLoop = true;
       bookLoop = true;
+      ATLoop = true;
       switch (option) {
         case "1":
           while (subjectLoop) {
@@ -36,12 +39,27 @@ public class BrowseController {
               sqlGetBooksBySubject(chosenSubject, currentPagination);
               currentPagination += 2;
             }
-          } 
-          System.out.println("Loop finished!");
+          }
           break;
         case "2":
-          System.out.println("Browse by Author and Title");
-          browseView.showBrowseByAuthorAndTitleMenu();
+          while (ATLoop) {
+            String authorChoice;
+            String titleChoice;
+            String searchByAuthorOrTitle = browseView.showBrowseByAuthorAndTitleMenu();
+            if (searchByAuthorOrTitle.equals("1")) {
+              authorChoice = browseView.getAuthorChoice();
+              while (bookLoop) {
+                sqlGetBookByAuthor(authorChoice, ATPagination);
+                ATPagination += 3;
+              }
+            } else if (searchByAuthorOrTitle.equals("2")) {
+              titleChoice = browseView.getTitleChoice();
+              while (bookLoop) {
+                sqlGetBookByTitle(titleChoice, ATPagination);
+                ATPagination += 3;
+              }
+            }
+          }
           break;
         case "3":
           System.out.println("Please enter your choice 3");
@@ -95,7 +113,7 @@ public class BrowseController {
         System.out.println("No books in the subject " + chosenSubject + ", please chose a new subject!");
         System.out.println("\n");
         bookLoop = false;
-      } 
+      }
 
       while (resultSet.next()) {
         String isbn = resultSet.getString("isbn");
@@ -113,7 +131,7 @@ public class BrowseController {
         System.out.println("'n' + 'Enter' for more book options or just 'ENTER' to go back");
         String moreBooks;
         boolean paginationLoop = true;
-        while(paginationLoop) {
+        while (paginationLoop) {
           moreBooks = browseView.getBookChoice();
           paginationLoop = false;
           if (moreBooks.equalsIgnoreCase("n")) {
@@ -125,12 +143,115 @@ public class BrowseController {
             paginationLoop = false;
           } else {
             System.out.println("Wrong input");
-            // currentPagination -=2;
             paginationLoop = true;
           }
           System.out.println("\n");
         }
       }
+    } catch (Exception e) {
+      System.out.println("Database connection failed!");
+      e.printStackTrace();
+    }
+  }
+
+  public void sqlGetBookByAuthor(String authorChoice, int ATpagination) {
+    String url = "jdbc:mysql://localhost:3306/book_store";
+    String user = "root";
+    String password = "root";
+
+    String query = "SELECT * FROM books where author like '%" + authorChoice + "%' LIMIT 3 OFFSET " + ATpagination;
+
+    try (
+        Connection connection = DriverManager.getConnection(url, user, password);
+        Statement statement = connection.createStatement();
+        ResultSet resultSet = statement.executeQuery(query)) {
+
+      while (resultSet.next()) {
+        String isbn = resultSet.getString("isbn");
+        String title = resultSet.getString("title");
+        String author = resultSet.getString("author");
+        double price = resultSet.getDouble("price");
+        String subject = resultSet.getString("subject");
+
+        System.out.println("ISBN: " + isbn + ", \nTitle: " + title + ", \nAuthor: " + author + ", \nPrice: " + price
+            + ", \nSubject: " + subject);
+        System.out.println("\n");
+      }
+
+      if (resultSet.isAfterLast()) {
+        System.out.println("'n' + 'Enter' for more book options or just 'ENTER' to go back");
+        String moreBooks;
+        boolean paginationLoop = true;
+        while (paginationLoop) {
+          moreBooks = browseView.getBookChoice();
+          paginationLoop = false;
+          if (moreBooks.equalsIgnoreCase("n")) {
+            paginationLoop = false;
+            return;
+          } else if (moreBooks.equalsIgnoreCase("")) {
+            ATLoop = false;
+            bookLoop = false;
+            paginationLoop = false;
+          } else {
+            System.out.println("Wrong input");
+            paginationLoop = true;
+          }
+          System.out.println("\n");
+        }
+      }
+
+    } catch (Exception e) {
+      System.out.println("Database connection failed!");
+      e.printStackTrace();
+    }
+  }
+
+  public void sqlGetBookByTitle(String titleChoice, int ATpagination) {
+    String url = "jdbc:mysql://localhost:3306/book_store";
+    String user = "root";
+    String password = "root";
+
+    String query = "SELECT * FROM books where title like '%" + titleChoice + "%' LIMIT 3 OFFSET " + ATpagination;
+
+    try (
+        Connection connection = DriverManager.getConnection(url, user, password);
+        Statement statement = connection.createStatement();
+        ResultSet resultSet = statement.executeQuery(query)) {
+
+      while (resultSet.next()) {
+        String isbn = resultSet.getString("isbn");
+        String title = resultSet.getString("title");
+        String author = resultSet.getString("author");
+        double price = resultSet.getDouble("price");
+        String subject = resultSet.getString("subject");
+
+        System.out.println("ISBN: " + isbn + ", \nTitle: " + title + ", \nAuthor: " + author + ", \nPrice: " + price
+            + ", \nSubject: " + subject);
+        System.out.println("\n");
+      }
+
+      if (resultSet.isAfterLast()) {
+        System.out.println("'n' + 'Enter' for more book options or just 'ENTER' to go back");
+        String moreBooks;
+        boolean paginationLoop = true;
+        while (paginationLoop) {
+          moreBooks = browseView.getBookChoice();
+          paginationLoop = false;
+          if (moreBooks.equalsIgnoreCase("n")) {
+            paginationLoop = false;
+            return;
+          } else if (moreBooks.equalsIgnoreCase("")) {
+            ATLoop = false;
+            bookLoop = false;
+            paginationLoop = false;
+          } else {
+            System.out.println("Wrong input");
+            paginationLoop = true;
+          }
+          System.out.println("\n");
+        }
+      }
+
     } catch (Exception e) {
       System.out.println("Database connection failed!");
       e.printStackTrace();
@@ -156,8 +277,9 @@ public class BrowseController {
         double price = resultSet.getDouble("price");
         String subject = resultSet.getString("subject");
 
-        System.out.println("ISBN: " + isbn + ", Title: " + title + ", Author: " + author + ", Price: " + price
-            + ", Subject: " + subject);
+        System.out.println("ISBN: " + isbn + ", \nTitle: " + title + ", \nAuthor: " + author + ", \nPrice: " + price
+            + ", \nSubject: " + subject);
+        System.out.println("\n");
       }
 
     } catch (Exception e) {
