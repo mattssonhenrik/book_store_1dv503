@@ -196,8 +196,12 @@ public class BrowseController {
             bookLoop = false;
             paginationLoop = false;
           } else {
-            // Gotta check if the input is an ISBN first, if not we proceed
-            System.out.println("Wrong input");
+            String ISBN = checkIfGivenStringIsValidISBN(moreBooks);
+            if (ISBN != null) {
+              getBookByISBN(ISBN);
+            } else {
+              System.out.println("Wrong input");
+            }
             paginationLoop = true;
           }
           System.out.println("\n");
@@ -249,8 +253,12 @@ public class BrowseController {
             bookLoop = false;
             paginationLoop = false;
           } else {
-            // Gotta check if the input is an ISBN first, if not we proceed
-            System.out.println("Wrong input");
+            String ISBN = checkIfGivenStringIsValidISBN(moreBooks);
+            if (ISBN != null) {
+              getBookByISBN(ISBN);
+            } else {
+              System.out.println("Wrong input");
+            }
             paginationLoop = true;
           }
           System.out.println("\n");
@@ -292,4 +300,61 @@ public class BrowseController {
       e.printStackTrace();
     }
   }
+
+  public String checkIfGivenStringIsValidISBN(String statedISBN) {
+
+    String url = "jdbc:mysql://localhost:3306/book_store";
+    String user = "root";
+    String password = "root";
+
+    String query = "SELECT * FROM Books WHERE isbn = " + '"' + statedISBN + '"';
+
+    try (
+        Connection connection = DriverManager.getConnection(url, user, password);
+        Statement statement = connection.createStatement();
+        ResultSet resultSet = statement.executeQuery(query)) {
+
+      if (resultSet.isBeforeFirst()) {
+        System.out.println("It is a book!");
+        return statedISBN;
+      } else {
+        System.out.println("Not a book");
+        return null;
+      }
+
+    } catch (Exception e) {
+      System.out.println("Database connection failed!");
+      e.printStackTrace();
+    }
+    return null;
+  }
+
+  public void getBookByISBN(String ISBN) {
+    String url = "jdbc:mysql://localhost:3306/book_store";
+    String user = "root";
+    String password = "root";
+
+    String query = "SELECT * FROM books where isbn = " + ISBN;
+
+    try (
+        Connection connection = DriverManager.getConnection(url, user, password);
+        Statement statement = connection.createStatement();
+        ResultSet resultSet = statement.executeQuery(query)) {
+
+      while (resultSet.next()) {
+        String isbn = resultSet.getString("isbn");
+        String title = resultSet.getString("title");
+        String author = resultSet.getString("author");
+        double price = resultSet.getDouble("price");
+        String subject = resultSet.getString("subject");
+
+        System.out.println("ISBN: " + isbn + ", \nTitle: " + title + ", \nAuthor: " + author + ", \nPrice: " + price
+            + ", \nSubject: " + subject);
+        System.out.println("\n");
+      }
+    } catch (Exception e) {
+      System.out.println("Database connection failed!");
+      e.printStackTrace();
+    }
+}
 }
