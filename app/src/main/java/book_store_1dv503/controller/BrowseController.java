@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 
 import book_store_1dv503.view.BrowseView;
+import book_store_1dv503.model.Cart;
 
 public class BrowseController {
   BrowseView browseView;
@@ -15,6 +16,7 @@ public class BrowseController {
   boolean ATLoop = true;
   int currentPagination = 0;
   int ATPagination = 0;
+  Cart cart;
 
   public BrowseController() {
     browseView = new BrowseView();

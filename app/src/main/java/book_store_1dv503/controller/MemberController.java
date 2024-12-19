@@ -40,9 +40,44 @@ public class MemberController {
   }
 
   public void loginMember() {
-    // Something something login member, try/catch?
-    // If successful
-    browseController = new BrowseController();
+    String email = memberMenuView.getEmail();
+    String password = memberMenuView.getPassword();
+    String databasePassword = getEmailPasswordFromDatabase(email);
+    
+    if (password.equalsIgnoreCase(databasePassword)) {
+      System.out.println("Login SUCCESS");
+      browseController = new BrowseController();
+    } else {
+      System.out.println("Wrong password!");
+    }
+    
+  }
+
+  public String getEmailPasswordFromDatabase(String email) {
+    String url = "jdbc:mysql://localhost:3306/book_store";
+    String user = "root";
+    String password = "root";
+
+    String query = "SELECT password FROM Members WHERE email = " + '"' + email + '"';
+
+    try (
+        Connection connection = DriverManager.getConnection(url, user, password);
+        Statement statement = connection.createStatement();
+        ResultSet resultSet = statement.executeQuery(query)) {
+
+      if (!resultSet.isBeforeFirst()) {
+        System.out.println("The email does not exist");
+        return null;
+      } else {
+        resultSet.next();
+        return resultSet.getString("password");
+      }
+
+    } catch (Exception e) {
+      System.out.println("Database connection failed!");
+      e.printStackTrace();
+    }
+    return null;
   }
 
   public void registerMember() {
