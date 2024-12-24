@@ -144,8 +144,14 @@ public class BrowseController {
             bookLoop = false;
             paginationLoop = false;
           } else {
-            // Gotta check if the input is an ISBN first, if not we proceed
-            System.out.println("Wrong input");
+            String ISBN = checkIfGivenStringIsValidISBN(moreBooks);
+            if (ISBN != null) {
+              getBookByISBN(ISBN);
+              browseView.addBookByISBN();
+              browseView.addHowManyBooksToCart();
+            } else {
+              System.out.println("Wrong input");
+            }
             paginationLoop = true;
           }
           System.out.println("\n");
@@ -199,6 +205,7 @@ public class BrowseController {
             String ISBN = checkIfGivenStringIsValidISBN(moreBooks);
             if (ISBN != null) {
               getBookByISBN(ISBN);
+              browseView.addBookByISBN();
             } else {
               System.out.println("Wrong input");
             }
@@ -256,6 +263,7 @@ public class BrowseController {
             String ISBN = checkIfGivenStringIsValidISBN(moreBooks);
             if (ISBN != null) {
               getBookByISBN(ISBN);
+              browseView.addBookByISBN();
             } else {
               System.out.println("Wrong input");
             }
@@ -357,4 +365,10 @@ public class BrowseController {
       e.printStackTrace();
     }
 }
+  public void testToCommit () {
+    System.out.println("TEST TO COMMIT");
+  }
+
 }
+
+// TEST TO COMMIT

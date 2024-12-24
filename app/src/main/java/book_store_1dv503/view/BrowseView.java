@@ -69,7 +69,7 @@ public class BrowseView {
     return userChoice;
   }
 
-  public void printSubject (String subject) {
+  public void printSubject(String subject) {
     System.out.println("Subject: " + subject);
   }
 
@@ -100,6 +100,38 @@ public class BrowseView {
     System.out.println("Which title are you interested in?");
     String userChoice = scanner.nextLine().trim().toLowerCase();
     return userChoice;
+  }
+
+  public Boolean addBookByISBN() {
+    System.out.println("Do you want to add this book to your Cart?");
+    while (true) {
+      String userChoice = scanner.nextLine().trim().toLowerCase();
+      if (userChoice.equals("y") || userChoice.equals("yes")) {
+        return true;
+      } else if (userChoice.equals("n") || userChoice.equals("no")) {
+        return false;
+      } else {
+        System.out.println("You have to chose either 'y' (yes) or 'n' (no)");
+      }
+    }
+  }
+
+  public int addHowManyBooksToCart() {
+    int bookQuantity = 0;
+    System.out.println("How many Books do you want to Add?");
+    while (bookQuantity <= 0) {
+      if (scanner.hasNextInt()) {
+        bookQuantity = scanner.nextInt();
+        scanner.nextLine();
+        if (bookQuantity <= 0) {
+          System.out.println("You have to state a positive number");
+      }
+      } else {
+        scanner.nextLine();
+        System.out.println("You have to state a positive number");
+      }
+    }
+    return bookQuantity;
   }
 
 }
