@@ -103,7 +103,7 @@ public class BrowseView {
   }
 
   public Boolean addBookByISBN() {
-    System.out.println("Do you want to add this book to your Cart?");
+    System.out.println("Do you want to add this book to your Cart (y/n)?");
     while (true) {
       String userChoice = scanner.nextLine().trim().toLowerCase();
       if (userChoice.equals("y") || userChoice.equals("yes")) {

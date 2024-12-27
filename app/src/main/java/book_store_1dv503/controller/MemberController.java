@@ -13,6 +13,9 @@ public class MemberController {
   Member member;
   boolean running = true;
   MemberMenuView memberMenuView;
+  String url = "jdbc:mysql://localhost:3306/book_store";
+  String user = "root";
+  String password = "root";
 
   public MemberController() {
     startMemberMenu();
@@ -43,28 +46,23 @@ public class MemberController {
     String email = memberMenuView.getEmail();
     String password = memberMenuView.getPassword();
     String databasePassword = getEmailPasswordFromDatabase(email);
-    
+
     if (password.equalsIgnoreCase(databasePassword)) {
       System.out.println("Login SUCCESS");
-      browseController = new BrowseController();
+      int userId = getUserIdByEmail(email); 
+      browseController = new BrowseController(userId);
     } else {
       System.out.println("Wrong password!");
     }
-    
+
   }
 
   public String getEmailPasswordFromDatabase(String email) {
-    String url = "jdbc:mysql://localhost:3306/book_store";
-    String user = "root";
-    String password = "root";
-
     String query = "SELECT password FROM Members WHERE email = " + '"' + email + '"';
-
     try (
         Connection connection = DriverManager.getConnection(url, user, password);
         Statement statement = connection.createStatement();
         ResultSet resultSet = statement.executeQuery(query)) {
-
       if (!resultSet.isBeforeFirst()) {
         System.out.println("The email does not exist");
         return null;
@@ -72,7 +70,6 @@ public class MemberController {
         resultSet.next();
         return resultSet.getString("password");
       }
-
     } catch (Exception e) {
       System.out.println("Database connection failed!");
       e.printStackTrace();
@@ -88,7 +85,7 @@ public class MemberController {
     int zip = memberMenuView.getZip();
     String phone = memberMenuView.getPhone();
     boolean uniqueEmail = false;
-    String email; 
+    String email;
     do {
       email = memberMenuView.getEmail();
       uniqueEmail = checkForUniqueEmail(email);
@@ -99,17 +96,11 @@ public class MemberController {
   }
 
   public boolean checkForUniqueEmail(String email) {
-    String url = "jdbc:mysql://localhost:3306/book_store";
-    String user = "root";
-    String password = "root";
-
     String query = "SELECT * FROM Members WHERE email = " + '"' + email + '"';
-
     try (
         Connection connection = DriverManager.getConnection(url, user, password);
         Statement statement = connection.createStatement();
         ResultSet resultSet = statement.executeQuery(query)) {
-
       if (!resultSet.isBeforeFirst()) {
         System.out.println("The email is unique");
         return true;
@@ -117,7 +108,6 @@ public class MemberController {
         System.out.println("The email is NOT unique");
         return false;
       }
-
     } catch (Exception e) {
       System.out.println("Database connection failed!");
       e.printStackTrace();
@@ -129,7 +119,6 @@ public class MemberController {
     String url = "jdbc:mysql://localhost:3306/book_store";
     String user = "root";
     String password = "root";
-
     String query = "INSERT INTO members (fname, lname, address, city, zip, phone, email, password) VALUES ('"
         + member.getFirstName() + "', '"
         + member.getLastName() + "', '"
@@ -139,21 +128,34 @@ public class MemberController {
         + member.getPhone() + "', '"
         + member.getEmail() + "', '"
         + member.getPassword() + "')";
-
     try (
         Connection connection = DriverManager.getConnection(url, user, password);
         Statement statement = connection.createStatement()) {
-
       int rowsAffected = statement.executeUpdate(query);
       if (rowsAffected > 0) {
         System.out.println("Member registered successfully!");
       } else {
         System.out.println("Failed to register the member.");
       }
-
     } catch (Exception e) {
       System.out.println("Database connection failed!");
       e.printStackTrace();
     }
+  }
+
+  public int getUserIdByEmail(String email) {
+    String query = "SELECT userid FROM members WHERE email = \"" + email + "\"";
+    try (
+        Connection connection = DriverManager.getConnection(url, user, password);
+        Statement statement = connection.createStatement();
+        ResultSet resultSet = statement.executeQuery(query)) {
+      if (resultSet.next()) {
+        return resultSet.getInt("userid");
+      }
+    } catch (Exception e) {
+      System.out.println("Failed to fetch user ID!");
+      e.printStackTrace();
+    }
+    return 0;
   }
 }

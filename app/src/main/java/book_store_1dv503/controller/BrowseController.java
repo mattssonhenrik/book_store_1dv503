@@ -4,12 +4,15 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.Map;
 
 import book_store_1dv503.view.BrowseView;
+import book_store_1dv503.controller.CartController;
 import book_store_1dv503.model.Cart;
 
 public class BrowseController {
   BrowseView browseView;
+  CartController cartController;
   boolean running = true;
   boolean subjectLoop = true;
   boolean bookLoop = true;
@@ -17,14 +20,18 @@ public class BrowseController {
   int currentPagination = 0;
   int ATPagination = 0;
   Cart cart;
+  String url = "jdbc:mysql://localhost:3306/book_store";
+  String user = "root";
+  String password = "root";
 
-  public BrowseController() {
+  public BrowseController(int userId) {
     browseView = new BrowseView();
+    cartController = new CartController(userId);
+    this.cart = new Cart(userId);
     startBrowseMenu();
   }
 
   public void startBrowseMenu() {
-    BrowseView browseView = new BrowseView();
     while (running) {
       String option = browseView.showBrowseMenu();
       running = true;
@@ -64,10 +71,9 @@ public class BrowseController {
           }
           break;
         case "3":
-          System.out.println("Please enter your choice 3");
+          cartController.handleCart();
           break;
         case "4":
-          System.out.println("Please enter your choice 4");
           running = false;
           break;
         default:
@@ -78,22 +84,15 @@ public class BrowseController {
   }
 
   public void sqlQuerySubject() {
-    String url = "jdbc:mysql://localhost:3306/book_store";
-    String user = "root";
-    String password = "root";
-
     String query = "SELECT DISTINCT SUBJECT FROM books order by subject asc";
-
     try (
         Connection connection = DriverManager.getConnection(url, user, password);
         Statement statement = connection.createStatement();
         ResultSet resultSet = statement.executeQuery(query)) {
       while (resultSet.next()) {
-
         String subject = resultSet.getString("subject");
         browseView.printSubject(subject);
       }
-
     } catch (Exception e) {
       System.out.println("Database connection failed!");
       e.printStackTrace();
@@ -101,36 +100,29 @@ public class BrowseController {
   }
 
   public void sqlGetBooksBySubject(String chosenSubject, int currentPagination) {
-    String url = "jdbc:mysql://localhost:3306/book_store";
-    String user = "root";
-    String password = "root";
     String query = "SELECT * FROM books WHERE subject = '" + chosenSubject + "' LIMIT 2 OFFSET " + currentPagination;
-
     try (
         Connection connection = DriverManager.getConnection(url, user, password);
         Statement statement = connection.createStatement();
         ResultSet resultSet = statement.executeQuery(query)) {
-
       if (!resultSet.isBeforeFirst()) {
         System.out.println("No books in the subject " + chosenSubject + ", please chose a new subject!");
         System.out.println("\n");
         bookLoop = false;
       }
-
       while (resultSet.next()) {
         String isbn = resultSet.getString("isbn");
         String title = resultSet.getString("title");
         String author = resultSet.getString("author");
         double price = resultSet.getDouble("price");
         String subject = resultSet.getString("subject");
-
         System.out.println("ISBN: " + isbn + ", \nTitle: " + title + ", \nAuthor: " + author + ", \nPrice: " + price
             + ", \nSubject: " + subject);
         System.out.println("\n");
       }
-
       if (resultSet.isAfterLast()) {
-        System.out.println("'n' + 'Enter' for more book options or just 'ENTER' to go back");
+        System.out.println(
+            "State ISBN if you want to add book to cart, 'n' + 'Enter' for more book options or just 'ENTER' to go back");
         String moreBooks;
         boolean paginationLoop = true;
         while (paginationLoop) {
@@ -147,8 +139,16 @@ public class BrowseController {
             String ISBN = checkIfGivenStringIsValidISBN(moreBooks);
             if (ISBN != null) {
               getBookByISBN(ISBN);
-              browseView.addBookByISBN();
-              browseView.addHowManyBooksToCart();
+              Boolean addBook = browseView.addBookByISBN();
+              if (addBook) {
+                int quantityOfBooks = browseView.addHowManyBooksToCart();
+                cart.addBook(ISBN, quantityOfBooks);
+                saveCartToDatabase(cart);
+                System.out.println("\n");
+              } else {
+                paginationLoop = true;
+                continue;
+              }
             } else {
               System.out.println("Wrong input");
             }
@@ -164,17 +164,11 @@ public class BrowseController {
   }
 
   public void sqlGetBookByAuthor(String authorChoice, int ATpagination) {
-    String url = "jdbc:mysql://localhost:3306/book_store";
-    String user = "root";
-    String password = "root";
-
     String query = "SELECT * FROM books where author like '%" + authorChoice + "%' LIMIT 3 OFFSET " + ATpagination;
-
     try (
         Connection connection = DriverManager.getConnection(url, user, password);
         Statement statement = connection.createStatement();
         ResultSet resultSet = statement.executeQuery(query)) {
-
       while (resultSet.next()) {
         String isbn = resultSet.getString("isbn");
         String title = resultSet.getString("title");
@@ -186,9 +180,9 @@ public class BrowseController {
             + ", \nSubject: " + subject);
         System.out.println("\n");
       }
-
       if (resultSet.isAfterLast()) {
-        System.out.println("'n' + 'Enter' for more book options or just 'ENTER' to go back");
+        System.out.println(
+            "State ISBN if you want to add book to cart, 'n' + 'Enter' for more book options or just 'ENTER' to go back");
         String moreBooks;
         boolean paginationLoop = true;
         while (paginationLoop) {
@@ -205,7 +199,15 @@ public class BrowseController {
             String ISBN = checkIfGivenStringIsValidISBN(moreBooks);
             if (ISBN != null) {
               getBookByISBN(ISBN);
-              browseView.addBookByISBN();
+              Boolean addBook = browseView.addBookByISBN();
+              if (addBook) {
+                int quantityOfBooks = browseView.addHowManyBooksToCart();
+                cart.addBook(ISBN, quantityOfBooks);
+                saveCartToDatabase(cart);
+              } else {
+                paginationLoop = true;
+                continue;
+              }
             } else {
               System.out.println("Wrong input");
             }
@@ -222,31 +224,24 @@ public class BrowseController {
   }
 
   public void sqlGetBookByTitle(String titleChoice, int ATpagination) {
-    String url = "jdbc:mysql://localhost:3306/book_store";
-    String user = "root";
-    String password = "root";
-
     String query = "SELECT * FROM books where title like '%" + titleChoice + "%' LIMIT 3 OFFSET " + ATpagination;
-
     try (
         Connection connection = DriverManager.getConnection(url, user, password);
         Statement statement = connection.createStatement();
         ResultSet resultSet = statement.executeQuery(query)) {
-
       while (resultSet.next()) {
         String isbn = resultSet.getString("isbn");
         String title = resultSet.getString("title");
         String author = resultSet.getString("author");
         double price = resultSet.getDouble("price");
         String subject = resultSet.getString("subject");
-
         System.out.println("ISBN: " + isbn + ", \nTitle: " + title + ", \nAuthor: " + author + ", \nPrice: " + price
             + ", \nSubject: " + subject);
         System.out.println("\n");
       }
-
       if (resultSet.isAfterLast()) {
-        System.out.println("'n' + 'Enter' for more book options or just 'ENTER' to go back");
+        System.out.println(
+            "State ISBN if you want to add book to cart, 'n' + 'Enter' for more book options or just 'ENTER' to go back");
         String moreBooks;
         boolean paginationLoop = true;
         while (paginationLoop) {
@@ -263,7 +258,15 @@ public class BrowseController {
             String ISBN = checkIfGivenStringIsValidISBN(moreBooks);
             if (ISBN != null) {
               getBookByISBN(ISBN);
-              browseView.addBookByISBN();
+              Boolean addBook = browseView.addBookByISBN();
+              if (addBook) {
+                int quantityOfBooks = browseView.addHowManyBooksToCart();
+                cart.addBook(ISBN, quantityOfBooks);
+                saveCartToDatabase(cart);
+              } else {
+                paginationLoop = true;
+                continue;
+              }
             } else {
               System.out.println("Wrong input");
             }
@@ -272,37 +275,6 @@ public class BrowseController {
           System.out.println("\n");
         }
       }
-
-    } catch (Exception e) {
-      System.out.println("Database connection failed!");
-      e.printStackTrace();
-    }
-  }
-
-  public void SQLCALL() {
-    String url = "jdbc:mysql://localhost:3306/book_store";
-    String user = "root";
-    String password = "root";
-
-    String query = "SELECT * FROM books limit 5";
-
-    try (
-        Connection connection = DriverManager.getConnection(url, user, password);
-        Statement statement = connection.createStatement();
-        ResultSet resultSet = statement.executeQuery(query)) {
-
-      while (resultSet.next()) {
-        String isbn = resultSet.getString("isbn");
-        String title = resultSet.getString("title");
-        String author = resultSet.getString("author");
-        double price = resultSet.getDouble("price");
-        String subject = resultSet.getString("subject");
-
-        System.out.println("ISBN: " + isbn + ", \nTitle: " + title + ", \nAuthor: " + author + ", \nPrice: " + price
-            + ", \nSubject: " + subject);
-        System.out.println("\n");
-      }
-
     } catch (Exception e) {
       System.out.println("Database connection failed!");
       e.printStackTrace();
@@ -310,18 +282,11 @@ public class BrowseController {
   }
 
   public String checkIfGivenStringIsValidISBN(String statedISBN) {
-
-    String url = "jdbc:mysql://localhost:3306/book_store";
-    String user = "root";
-    String password = "root";
-
     String query = "SELECT * FROM Books WHERE isbn = " + '"' + statedISBN + '"';
-
     try (
         Connection connection = DriverManager.getConnection(url, user, password);
         Statement statement = connection.createStatement();
         ResultSet resultSet = statement.executeQuery(query)) {
-
       if (resultSet.isBeforeFirst()) {
         System.out.println("It is a book!");
         return statedISBN;
@@ -329,7 +294,6 @@ public class BrowseController {
         System.out.println("Not a book");
         return null;
       }
-
     } catch (Exception e) {
       System.out.println("Database connection failed!");
       e.printStackTrace();
@@ -338,24 +302,17 @@ public class BrowseController {
   }
 
   public void getBookByISBN(String ISBN) {
-    String url = "jdbc:mysql://localhost:3306/book_store";
-    String user = "root";
-    String password = "root";
-
     String query = "SELECT * FROM books where isbn = " + ISBN;
-
     try (
         Connection connection = DriverManager.getConnection(url, user, password);
         Statement statement = connection.createStatement();
         ResultSet resultSet = statement.executeQuery(query)) {
-
       while (resultSet.next()) {
         String isbn = resultSet.getString("isbn");
         String title = resultSet.getString("title");
         String author = resultSet.getString("author");
         double price = resultSet.getDouble("price");
         String subject = resultSet.getString("subject");
-
         System.out.println("ISBN: " + isbn + ", \nTitle: " + title + ", \nAuthor: " + author + ", \nPrice: " + price
             + ", \nSubject: " + subject);
         System.out.println("\n");
@@ -364,11 +321,28 @@ public class BrowseController {
       System.out.println("Database connection failed!");
       e.printStackTrace();
     }
-}
-  public void testToCommit () {
-    System.out.println("TEST TO COMMIT");
   }
 
-}
+  public void saveCartToDatabase(Cart cart) {
+    try (
+        Connection connection = DriverManager.getConnection(url, user, password);
+        Statement statement = connection.createStatement()) {
+      for (Map.Entry<String, Integer> entry : cart.getBooks().entrySet()) {
+        String isbn = entry.getKey();
+        int quantity = entry.getValue();
 
-// TEST TO COMMIT
+        String query = "INSERT INTO cart (userid, isbn, qty) VALUES ("
+            + cart.getUserId() + ", '"
+            + isbn + "', "
+            + quantity + ") "
+            + "ON DUPLICATE KEY UPDATE qty = " + quantity;
+        statement.executeUpdate(query);
+      }
+      System.out.println("Cart updated successfully!");
+
+    } catch (Exception e) {
+      System.out.println("Database connection failed!");
+      e.printStackTrace();
+    }
+  }
+}
