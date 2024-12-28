@@ -4,17 +4,16 @@ import java.time.LocalDate;
 
 public class Order {
   private int userId;
-  private int orderNumber;
   private LocalDate created;
   private String shipAddress;
   private String shipCity;
   private int shipZip;
 
-  public Order (int userId, int orderNumber, String shipAddress, String shipCity, int shipZip) {
+  public Order (int userId, String shipAddress, String shipCity, int shipZip) {
     this.userId = userId;
-    this.orderNumber = orderNumber;
     this.created = LocalDate.now();
     this.shipAddress = shipAddress;
+    this.shipCity = shipCity;
     this.shipZip = shipZip;
   }
 

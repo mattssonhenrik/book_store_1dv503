@@ -116,9 +116,6 @@ public class MemberController {
   }
 
   public void saveMemberToDatabase(Member member) {
-    String url = "jdbc:mysql://localhost:3306/book_store";
-    String user = "root";
-    String password = "root";
     String query = "INSERT INTO members (fname, lname, address, city, zip, phone, email, password) VALUES ('"
         + member.getFirstName() + "', '"
         + member.getLastName() + "', '"

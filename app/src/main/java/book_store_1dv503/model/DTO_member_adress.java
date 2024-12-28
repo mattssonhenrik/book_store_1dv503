@@ -1,5 +1,6 @@
 package book_store_1dv503.model;
 
+// Data transfer object for moving member class fields to order class fields.
 public class DTO_member_adress {
   private String address;
   private String city;
