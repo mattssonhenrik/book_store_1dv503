@@ -21,32 +21,31 @@ public class InvoiceView {
     this.userId = userId;
   }
 
-
-  public String showCartAndAskIfCheckOut() {
+  public boolean showCartAndAskIfCheckOut() {
     System.out.println(".__________________________________________.");
     System.out.println("|     Welcome to the Online Book Store     |");
     System.out.println("|                 Cart Menu                |");
     System.out.println("|__________________________________________|");
 
     boolean somethingInCart = getCart();
-    String userChoice;
+    boolean userChoice;
     if (somethingInCart) {
       userChoice = readUserInput();
       return userChoice;
     } else {
-      userChoice = "no";
+      userChoice = false;
       return userChoice;
     }
   }
 
-  public String readUserInput() {
+  public boolean readUserInput() {
     System.out.println("Do you want to check out (y/n)?");
     while (true) {
       String userChoice = scanner.nextLine().trim().toLowerCase();
       if (userChoice.equals("y") || userChoice.equals("yes")) {
-        return userChoice;
+        return true;
       } else if (userChoice.equals("n") || userChoice.equals("no")) {
-        return userChoice;
+        return false;
       } else {
         System.out.println("You have to chose either 'y' (yes) or 'n' (no)");
       }

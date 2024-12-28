@@ -13,13 +13,13 @@ import book_store_1dv503.model.Cart;
 public class BrowseController {
   BrowseView browseView;
   CartController cartController;
+  Cart cart;
   boolean running = true;
   boolean subjectLoop = true;
   boolean bookLoop = true;
   boolean ATLoop = true;
   int currentPagination = 0;
   int ATPagination = 0;
-  Cart cart;
   String url = "jdbc:mysql://localhost:3306/book_store";
   String user = "root";
   String password = "root";

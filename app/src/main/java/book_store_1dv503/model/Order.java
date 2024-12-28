@@ -10,12 +10,30 @@ public class Order {
   private String shipCity;
   private int shipZip;
 
-  public Order (int userId, int orderNumber, LocalDate created, String shipAddress, String shipCity, int shipZip) {
+  public Order (int userId, int orderNumber, String shipAddress, String shipCity, int shipZip) {
     this.userId = userId;
     this.orderNumber = orderNumber;
-    this.created = created;
+    this.created = LocalDate.now();
     this.shipAddress = shipAddress;
     this.shipZip = shipZip;
   }
+
+  public LocalDate getCreated () {
+    return created;
+  }
+  
+  public String getShipAddress () {
+    return shipAddress;
+  }
+
+  public String getShipCity () {
+    return shipCity;
+  }
+
+  public int getShipZip () {
+    return shipZip;
+  }
+
+
 
 }
