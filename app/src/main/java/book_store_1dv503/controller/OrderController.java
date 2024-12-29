@@ -90,23 +90,25 @@ public class OrderController {
   }
 
   public void displayInvoiceHeader(int orderNumber) {
-    String query = "select * from cart join books ON cart.isbn = books.isbn join members ON cart.userid = members.userid  WHERE members.userId = " + '"' + userId + '"';
+    String query = "select * from cart join books ON cart.isbn = books.isbn join members ON cart.userid = members.userid  WHERE members.userId = "
+        + '"' + userId + '"';
     try (
         Connection connection = DriverManager.getConnection(url, user, password);
         Statement statement = connection.createStatement();
         ResultSet resultSet = statement.executeQuery(query)) {
       if (resultSet.isBeforeFirst()) {
-          resultSet.next();
-          String firstName = resultSet.getString("fname");
-          String lastName = resultSet.getString("lname");
-          shipAddress = resultSet.getString("address");
-          shipCity = resultSet.getString("city");
-          shipZip = resultSet.getInt("zip");
-          System.out.println("\n");
-          System.out.println("\n");
-          System.out.println("Invoice for order number: " + orderNumber);
-          System.out.println("Name: " + firstName + " " + lastName + ", \nShipping Adress: " + "\n-" + shipCity + "\n-" + shipAddress + "\n-" + shipZip);
-          System.out.println("\n");
+        resultSet.next();
+        String firstName = resultSet.getString("fname");
+        String lastName = resultSet.getString("lname");
+        shipAddress = resultSet.getString("address");
+        shipCity = resultSet.getString("city");
+        shipZip = resultSet.getInt("zip");
+        System.out.println("\n");
+        System.out.println("\n");
+        System.out.println("Invoice for order number: " + orderNumber);
+        System.out.println("Name: " + firstName + " " + lastName + ", \nShipping Adress: " + "\n-" + shipCity + "\n-"
+            + shipAddress + "\n-" + shipZip);
+        System.out.println("\n");
       } else {
       }
     } catch (Exception e) {
@@ -128,13 +130,17 @@ public class OrderController {
           String title = resultSet.getString("title");
           int qty = resultSet.getInt("qty");
           float price = resultSet.getFloat("price");
-          System.out.println("----------------------------------------------------------------------------------------------------");
-          System.out.println("ISBN: " + isbn + ", \nQuantity: " + qty + ", \nTitle: " + title + ", \nPrice per book: " + price);
-          grandTotal += (price*qty);
+          System.out.println(
+              "----------------------------------------------------------------------------------------------------");
+          System.out.println(
+              "ISBN: " + isbn + ", \nQuantity: " + qty + ", \nTitle: " + title + ", \nPrice per book: " + price);
+          grandTotal += (price * qty);
         }
-        System.out.println("====================================================================================================");
-        System.out.println("Grand total is: "+grandTotal);
-        System.out.println("====================================================================================================");
+        System.out.println(
+            "====================================================================================================");
+        System.out.println("Grand total is: " + grandTotal);
+        System.out.println(
+            "====================================================================================================");
 
         invoiceView.pressAnyKeyToContinue();
         deleteCartForOrder();
@@ -170,7 +176,21 @@ public class OrderController {
   }
 
   public void deleteCartForOrder() {
-    System.out.println("Not deleting anything yet, bud!!");
+    String query = "delete from cart where userId = " + '"' + userId + '"';
+    try (
+        Connection connection = DriverManager.getConnection(url, user, password);
+        Statement statement = connection.createStatement()
+    ) {
+      int rowsAffected = statement.executeUpdate(query);
+      if (rowsAffected > 0) {
+        System.out.println("Cart deleted");
+      } else {
+        System.out.println("No cart found");
+      }
+    } catch (Exception e) {
+      System.out.println("Database connection failed!");
+      e.printStackTrace();
+    }
   }
 
   public void storeOrderDetails() {
