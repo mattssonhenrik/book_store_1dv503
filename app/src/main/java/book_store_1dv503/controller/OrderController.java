@@ -90,7 +90,7 @@ public class OrderController {
   }
 
   public void displayInvoiceHeader(int orderNumber) {
-    String query = "select * from cart join books ON cart.isbn = books.isbn join members ON cart.userid = members.userid  WHERE members.userId = "
+    String query = "select *, DATE_ADD(created, INTERVAL 7 DAY) AS shipmentdate from members join orders on orders.userid=members.userid WHERE members.userId = "
         + '"' + userId + '"';
     try (
         Connection connection = DriverManager.getConnection(url, user, password);
@@ -98,6 +98,7 @@ public class OrderController {
         ResultSet resultSet = statement.executeQuery(query)) {
       if (resultSet.isBeforeFirst()) {
         resultSet.next();
+        String shipmentDate = resultSet.getString("shipmentdate");
         String firstName = resultSet.getString("fname");
         String lastName = resultSet.getString("lname");
         shipAddress = resultSet.getString("address");
@@ -109,13 +110,14 @@ public class OrderController {
         System.out.println("Name: " + firstName + " " + lastName + ", \nShipping Adress: " + "\n-" + shipCity + "\n-"
             + shipAddress + "\n-" + shipZip);
         System.out.println("\n");
+        System.out.println("ShipmentDate: " + shipmentDate);
+        System.out.println("\n");
       } else {
       }
     } catch (Exception e) {
       System.out.println("Database connection failed!");
       e.printStackTrace();
     }
-    System.out.println("This is your ordernumber " + orderNumber);
   }
 
   public void displayInvoiceBody() {
@@ -179,8 +181,7 @@ public class OrderController {
     String query = "delete from cart where userId = " + '"' + userId + '"';
     try (
         Connection connection = DriverManager.getConnection(url, user, password);
-        Statement statement = connection.createStatement()
-    ) {
+        Statement statement = connection.createStatement()) {
       int rowsAffected = statement.executeUpdate(query);
       if (rowsAffected > 0) {
         System.out.println("Cart deleted");
