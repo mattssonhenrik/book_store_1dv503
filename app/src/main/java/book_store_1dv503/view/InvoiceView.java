@@ -52,6 +52,11 @@ public class InvoiceView {
     }
   }
 
+  public void pressAnyKeyToContinue() {
+    System.out.println("Press 'Enter' to continue browsing.");
+      String userChoice = scanner.nextLine();
+  }
+
   public boolean getCart() {
         String query = "SELECT * FROM cart join books ON cart.isbn = books.isbn WHERE userId = " + '"' + userId + '"';
     try (

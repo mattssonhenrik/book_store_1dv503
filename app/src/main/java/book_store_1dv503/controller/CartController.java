@@ -16,7 +16,6 @@ public class CartController {
     boolean invoiceCartOrNot = invoiceView.showCartAndAskIfCheckOut();
     if (invoiceCartOrNot) {
       OrderController orderController = new OrderController(userId);
-      System.out.println("The cart would have been emptied!!");
     }
   }
 

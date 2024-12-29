@@ -7,8 +7,10 @@ import java.sql.Statement;
 
 import book_store_1dv503.model.DTO_member_adress;
 import book_store_1dv503.model.Order;
+import book_store_1dv503.view.InvoiceView;
 
 public class OrderController {
+  int grandTotal = 0;
   Order order;
   int orderNumber;
   int userId;
@@ -18,15 +20,18 @@ public class OrderController {
   String url = "jdbc:mysql://localhost:3306/book_store";
   String user = "root";
   String password = "root";
+  InvoiceView invoiceView;
 
   public OrderController(int userId) {
     this.userId = userId;
+    invoiceView = new InvoiceView(userId);
 
     registerOrder();
 
     orderNumber = getOrderNumber();
     if (orderNumber != -1) {
-      displayInvoice(orderNumber);
+      displayInvoiceHeader(orderNumber);
+      displayInvoiceBody();
       storeOrderDetails();
     } else {
       System.out.println("Feel free to continue browsing!");
@@ -84,8 +89,62 @@ public class OrderController {
     return -1;
   }
 
-  public void displayInvoice(int orderNumber) {
+  public void displayInvoiceHeader(int orderNumber) {
+    String query = "select * from cart join books ON cart.isbn = books.isbn join members ON cart.userid = members.userid  WHERE members.userId = " + '"' + userId + '"';
+    try (
+        Connection connection = DriverManager.getConnection(url, user, password);
+        Statement statement = connection.createStatement();
+        ResultSet resultSet = statement.executeQuery(query)) {
+      if (resultSet.isBeforeFirst()) {
+          resultSet.next();
+          String firstName = resultSet.getString("fname");
+          String lastName = resultSet.getString("lname");
+          shipAddress = resultSet.getString("address");
+          shipCity = resultSet.getString("city");
+          shipZip = resultSet.getInt("zip");
+          System.out.println("\n");
+          System.out.println("\n");
+          System.out.println("Invoice for order number: " + orderNumber);
+          System.out.println("Name: " + firstName + " " + lastName + ", \nShipping Adress: " + "\n-" + shipCity + "\n-" + shipAddress + "\n-" + shipZip);
+          System.out.println("\n");
+      } else {
+      }
+    } catch (Exception e) {
+      System.out.println("Database connection failed!");
+      e.printStackTrace();
+    }
     System.out.println("This is your ordernumber " + orderNumber);
+  }
+
+  public void displayInvoiceBody() {
+    String query = "select * from cart join books ON cart.isbn = books.isbn WHERE userId = " + '"' + userId + '"';
+    try (
+        Connection connection = DriverManager.getConnection(url, user, password);
+        Statement statement = connection.createStatement();
+        ResultSet resultSet = statement.executeQuery(query)) {
+      if (resultSet.isBeforeFirst()) {
+        while (resultSet.next()) {
+          String isbn = resultSet.getString("isbn");
+          String title = resultSet.getString("title");
+          int qty = resultSet.getInt("qty");
+          float price = resultSet.getFloat("price");
+          System.out.println("----------------------------------------------------------------------------------------------------");
+          System.out.println("ISBN: " + isbn + ", \nQuantity: " + qty + ", \nTitle: " + title + ", \nPrice per book: " + price);
+          grandTotal += (price*qty);
+        }
+        System.out.println("====================================================================================================");
+        System.out.println("Grand total is: "+grandTotal);
+        System.out.println("====================================================================================================");
+
+        invoiceView.pressAnyKeyToContinue();
+        deleteCartForOrder();
+      } else {
+        System.out.println("Nothing in the cart yet");
+      }
+    } catch (Exception e) {
+      System.out.println("Database connection failed!");
+      e.printStackTrace();
+    }
   }
 
   public void storeOrderInDatabase(Order order) {
@@ -108,8 +167,6 @@ public class OrderController {
       System.out.println("Database connection failed!");
       e.printStackTrace();
     }
-
-    deleteCartForOrder();
   }
 
   public void deleteCartForOrder() {
